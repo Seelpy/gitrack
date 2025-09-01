@@ -1,11 +1,13 @@
 package app
 
-type Provider interface {
+import "gitrack/pkg/app/service"
+
+func NewProvider(gitrack service.Gitrack) Provider {
+	return Provider{
+		Gitrack: gitrack,
+	}
 }
 
-func NewProvider() Provider {
-	return &provider{}
-}
-
-type provider struct {
+type Provider struct {
+	Gitrack service.Gitrack
 }

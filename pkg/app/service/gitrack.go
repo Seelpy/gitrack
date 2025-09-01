@@ -49,7 +49,7 @@ type BranchInfo struct {
 }
 
 func (g *Gitrack) GetBranchInfo(ctx context.Context) (Issue, error) {
-	branch, err := g.git.GetBranch(ctx)
+	branch, err := g.git.GetBranch()
 	if err != nil {
 		return Issue{}, err
 	}
@@ -60,16 +60,16 @@ func (g *Gitrack) GetBranchInfo(ctx context.Context) (Issue, error) {
 	return issue, nil
 }
 
-func (g *Gitrack) Commit(ctx context.Context, message string) error {
-	branch, err := g.git.GetBranch(ctx)
+func (g *Gitrack) Commit(message string) error {
+	branch, err := g.git.GetBranch()
 	if err != nil {
 		return err
 	}
-	return g.git.Commit(ctx, fmt.Sprintf(commitMessageTemplate, branch, message))
+	return g.git.Commit(fmt.Sprintf(commitMessageTemplate, branch, message))
 }
 
 func (g *Gitrack) Merge(ctx context.Context) error {
-	branch, err := g.git.GetBranch(ctx)
+	branch, err := g.git.GetBranch()
 	if err != nil {
 		return err
 	}
@@ -79,13 +79,13 @@ func (g *Gitrack) Merge(ctx context.Context) error {
 		return err
 	}
 
-	mergePipeline, err := g.getMergePipeline(ctx, issue)
+	mergePipeline, err := g.getMergePipeline(issue)
 	if err != nil {
 		return err
 	}
 
 	for i := 1; i < len(mergePipeline); i++ {
-		err = g.git.Merge(ctx, mergePipeline[i-1], mergePipeline[i])
+		err = g.git.Merge(mergePipeline[i-1], mergePipeline[i])
 		if err != nil {
 			return err
 		}
@@ -93,8 +93,8 @@ func (g *Gitrack) Merge(ctx context.Context) error {
 	return nil
 }
 
-func (g *Gitrack) getMergePipeline(ctx context.Context, issue Issue) ([]string, error) {
-	repository, err := g.git.GetRepository(ctx)
+func (g *Gitrack) getMergePipeline(issue Issue) ([]string, error) {
+	repository, err := g.git.GetRepository()
 	if err != nil {
 		return nil, err
 	}

@@ -1,27 +1,14 @@
 package command
 
 import (
-	"gitrack/pkg/app"
 	"log"
 )
 
-func init() {
-	commands = append(
-		commands,
-		func(provider app.Provider) Command {
-			return newTest()
-		},
-	)
-}
-
 func newTest() Command {
-	return &test{
-		subCommands: make([]Command, 0),
-	}
+	return &test{}
 }
 
 type test struct {
-	subCommands []Command
 }
 
 func (c *test) Name() string {
@@ -34,10 +21,6 @@ func (c *test) Help() string {
 
 func (c *test) Description() string {
 	return "test description"
-}
-
-func (c *test) SubCommands() []Command {
-	return nil
 }
 
 func (c *test) Run(args []string) error {

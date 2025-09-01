@@ -9,6 +9,7 @@ type IssueState int
 
 const (
 	IssueStateCodeReview = IssueState(iota)
+	IssueStateOther      = IssueState(iota)
 )
 
 var (

@@ -1,6 +1,9 @@
 package main
 
 import (
+	"gitrack/pkg/app/service"
+	"gitrack/pkg/inferastructure/git"
+	"gitrack/pkg/inferastructure/yt"
 	"log"
 	"os"
 
@@ -12,7 +15,10 @@ import (
 func main() {
 	cliApp := infraapp.New("test", "1.0.0")
 
-	provider := app.NewProvider()
+	gitService := git.NewService()
+	ytService := yt.NewService("", "")
+	gitrack := service.NewGitrack(gitService, ytService, nil)
+	provider := app.NewProvider(gitrack)
 	command.RegisterCommands(cliApp, provider)
 
 	exitStatus, err := cliApp.Run()

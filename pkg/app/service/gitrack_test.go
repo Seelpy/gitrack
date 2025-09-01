@@ -130,8 +130,6 @@ func TestGetBranchInDirectoryWithoutRepository(t *testing.T) {
 }
 
 func TestCommit(t *testing.T) {
-	ctx := context.Background()
-
 	git := newMockGit()
 	youtrack := newMockYoutrack()
 	configProvider := newMockGitrackConfigProvider()
@@ -143,7 +141,7 @@ func TestCommit(t *testing.T) {
 
 	gitrack := NewGitrack(git, youtrack, configProvider)
 
-	err := gitrack.Commit(ctx, "init commit")
+	err := gitrack.Commit("init commit")
 	assert.Nil(t, err)
 	assert.Equal(t, "ISSUE-1 init commit", git.lastCommit)
 }
@@ -238,26 +236,26 @@ type mergeData struct {
 	to   string
 }
 
-func (g *mockGit) GetBranch(_ context.Context) (string, error) {
+func (g *mockGit) GetBranch() (string, error) {
 	if g.repository == "" {
 		return "", ErrGitRepositoryNotFound
 	}
 	return g.branch, nil
 }
 
-func (g *mockGit) GetRepository(_ context.Context) (string, error) {
+func (g *mockGit) GetRepository() (string, error) {
 	if g.repository == "" {
 		return "", ErrGitRepositoryNotFound
 	}
 	return g.repository, nil
 }
 
-func (g *mockGit) Commit(_ context.Context, message string) error {
+func (g *mockGit) Commit(message string) error {
 	g.lastCommit = message
 	return nil
 }
 
-func (g *mockGit) Merge(_ context.Context, from string, to string) error {
+func (g *mockGit) Merge(from string, to string) error {
 	g.merges = append(g.merges, mergeData{
 		from: from,
 		to:   to,

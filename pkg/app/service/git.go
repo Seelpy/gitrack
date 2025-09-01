@@ -1,17 +1,18 @@
 package service
 
 import (
-	"context"
 	"errors"
 )
 
 var (
 	ErrGitRepositoryNotFound = errors.New("repository not found")
+	ErrBranchNotFound        = errors.New("branch not found")
+	ErrNoChangesToCommit     = errors.New("no changes to commit")
 )
 
 type Git interface {
-	GetBranch(ctx context.Context) (string, error)
-	GetRepository(ctx context.Context) (string, error)
-	Commit(ctx context.Context, message string) error
-	Merge(ctx context.Context, from string, to string) error
+	GetBranch() (string, error)
+	GetRepository() (string, error)
+	Commit(message string) error
+	Merge(from string, to string) error
 }
