@@ -25,7 +25,7 @@ func (c *getConfigPath) Description() string {
 }
 
 func (c *getConfigPath) Run(_ []string) error {
-	path, err := config.GetConfigPath(configPath)
+	path, err := config.GetConfigPath(ConfigPath)
 	if err != nil {
 		return err
 	}

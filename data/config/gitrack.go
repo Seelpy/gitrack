@@ -7,10 +7,6 @@ import (
 	"os"
 )
 
-type GitrackConfigProvider interface {
-	GetFeatureConfig(tag string, repository string) (FeatureConfig, error)
-}
-
 type Features []FeatureConfig
 
 type FeatureConfig struct {
@@ -21,6 +17,13 @@ type FeatureConfig struct {
 type ReleaseConfig struct {
 	ReleaseBranch string
 	YoutrackTag   string
+}
+
+type EmptyConfig struct {
+}
+
+func (ec *EmptyConfig) GetFeatureConfig(_ string, _ string) (appservice.FeatureConfig, error) {
+	return appservice.FeatureConfig{}, ErrPathNotExist
 }
 
 type Config struct {
@@ -52,8 +55,12 @@ type Release struct {
 	Branch string `yaml:"branch"`
 }
 
-func ParseConfig(filename string) (*Config, error) {
+func ParseConfig(filename string) (appservice.GitrackConfigProvider, error) {
 	data, err := os.ReadFile(filename)
+	if errors.Is(err, os.ErrNotExist) {
+		return &EmptyConfig{}, nil
+	}
+
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
@@ -67,13 +74,13 @@ func ParseConfig(filename string) (*Config, error) {
 	return &config, nil
 }
 
-func (c *Config) GetFeatureConfig(tag string, repository string) (FeatureConfig, error) {
+func (c *Config) GetFeatureConfig(tag string, repository string) (appservice.FeatureConfig, error) {
 	for _, feature := range c.Gitrack.Features {
 		for _, repo := range feature.Repositories {
 			if repo.RepositoryName == repository {
 				for _, release := range repo.Releases {
 					if release.Tag == tag {
-						return FeatureConfig{
+						return appservice.FeatureConfig{
 							FeatureTag: feature.BaseTag,
 							Releases:   convertReleases(repo.Releases),
 						}, nil
@@ -83,13 +90,13 @@ func (c *Config) GetFeatureConfig(tag string, repository string) (FeatureConfig,
 		}
 	}
 
-	return FeatureConfig{}, appservice.ErrFeatureConfigNotFound
+	return appservice.FeatureConfig{}, appservice.ErrFeatureConfigNotFound
 }
 
-func convertReleases(releases []Release) []ReleaseConfig {
-	var result []ReleaseConfig
+func convertReleases(releases []Release) []appservice.ReleaseConfig {
+	var result []appservice.ReleaseConfig
 	for _, release := range releases {
-		result = append(result, ReleaseConfig{
+		result = append(result, appservice.ReleaseConfig{
 			ReleaseBranch: release.Branch,
 			YoutrackTag:   release.Tag,
 		})

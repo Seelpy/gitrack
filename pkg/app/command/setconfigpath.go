@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	configPath = "pathconfig.yaml"
+	ConfigPath = "pathconfig.yaml"
 )
 
 var (
@@ -37,5 +37,5 @@ func (c *setConfigPath) Run(args []string) error {
 	if len(args) == 0 {
 		return errors.WithStack(ErrPathIsRequiredParams)
 	}
-	return config.SetConfigPath(configPath, args[0])
+	return config.SetConfigPath(ConfigPath, args[0])
 }
