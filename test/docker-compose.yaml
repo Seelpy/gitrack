@@ -1,0 +1,13 @@
+version: '3'
+
+services:
+  youtrack:
+    image: jetbrains/youtrack:2025.2.94372
+    container_name: youtrack-server
+    ports:
+      - "9090:8080"
+    volumes:
+      - ./data:/opt/youtrack/data
+      - ./conf:/opt/youtrack/conf
+      - ./logs:/opt/youtrack/logs
+    restart: unless-stopped

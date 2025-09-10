@@ -2,7 +2,6 @@ package command
 
 import (
 	"gitrack/pkg/app"
-	"gitrack/pkg/app/command/log"
 )
 
 type (
@@ -22,7 +21,9 @@ func RegisterCommands(registrar Registrar, provider app.Provider) {
 func init() {
 	commands = append(
 		commands,
-		func(provider app.Provider) Command { return log.NewLogger(newTest()) },
-		func(provider app.Provider) Command { return log.NewLogger(newBranch(provider.Gitrack)) },
+		func(provider app.Provider) Command { return newLogger(newTest()) },
+		func(provider app.Provider) Command { return newLogger(newBranch(provider.Gitrack)) },
+		func(provider app.Provider) Command { return newLogger(newSetConfigPath()) },
+		func(provider app.Provider) Command { return newLogger(newGetConfigPath()) },
 	)
 }

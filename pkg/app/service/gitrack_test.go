@@ -35,7 +35,6 @@ var (
 		ID:          issueID1,
 		Title:       issueTitle1,
 		Description: issueDescription1,
-		State:       IssueStateCodeReview,
 		Tags: []string{
 			ytFeatureTag1,
 			ytFeatureTagPre1,
@@ -45,7 +44,6 @@ var (
 		ID:          issueID2,
 		Title:       issueTitle2,
 		Description: issueDescription2,
-		State:       IssueStateCodeReview,
 		Tags: []string{
 			ytFeatureTag1,
 			ytFeatureTagPublic1,

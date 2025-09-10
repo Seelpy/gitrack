@@ -1,19 +1,18 @@
-package log
+package command
 
 import (
 	"errors"
-	"gitrack/pkg/app/command"
-	"log"
+	"fmt"
 )
 
-func NewLogger(command command.Command) command.Command {
+func newLogger(command Command) Command {
 	return &logger{
 		next: command,
 	}
 }
 
 type logger struct {
-	next command.Command
+	next Command
 }
 
 func (c *logger) Name() string {
@@ -31,7 +30,7 @@ func (c *logger) Description() string {
 func (c *logger) Run(args []string) error {
 	err := c.next.Run(args)
 	if err != nil {
-		log.Println(errors.Unwrap(err))
+		fmt.Println(errors.Unwrap(err))
 	}
 	return nil
 }

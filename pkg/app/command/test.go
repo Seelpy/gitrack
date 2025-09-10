@@ -1,7 +1,7 @@
 package command
 
 import (
-	"log"
+	"fmt"
 )
 
 func newTest() Command {
@@ -24,6 +24,6 @@ func (c *test) Description() string {
 }
 
 func (c *test) Run(args []string) error {
-	log.Println(args)
+	fmt.Println(args)
 	return nil
 }

@@ -3,7 +3,6 @@ package yt
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"gitrack/pkg/app/service"
 	"net/http"
 	"net/url"
@@ -32,40 +31,40 @@ func (yc *YoutrackClient) addAuthHeaders(req *http.Request) {
 }
 
 func (yc *YoutrackClient) GetIssue(ctx context.Context, issueID string) (service.Issue, error) {
-	issueURL, err := url.JoinPath(yc.baseURL, "api/issues", issueID)
+	searchURL, err := url.JoinPath(yc.baseURL, "api/issues")
 	if err != nil {
 		return service.Issue{}, errors.WithStack(err)
 	}
 
-	req, err := http.NewRequestWithContext(ctx, "GET", issueURL, nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", searchURL, nil)
 	if err != nil {
 		return service.Issue{}, errors.WithStack(err)
 	}
+
+	q := req.URL.Query()
+	q.Add("query", issueID)
+	q.Add("fields", "idReadable,summary,description,tags(name)")
+	req.URL.RawQuery = q.Encode()
 
 	yc.addAuthHeaders(req)
 
 	resp, err := yc.httpClient.Do(req)
+
 	if err != nil {
 		return service.Issue{}, errors.WithStack(err)
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode == http.StatusNotFound {
-		return service.Issue{}, errors.WithStack(service.ErrIssueNotFound)
-	}
-	if resp.StatusCode == http.StatusUnauthorized {
-		return service.Issue{}, errors.WithStack(fmt.Errorf("authentication failed: invalid token"))
-	}
-	if resp.StatusCode != http.StatusOK {
-		return service.Issue{}, errors.WithStack(fmt.Errorf("unexpected status code: %d", resp.StatusCode))
-	}
-
-	var issueResponse youtrackIssueResponse
-	if err := json.NewDecoder(resp.Body).Decode(&issueResponse); err != nil {
+	var issues []youtrackIssueResponse
+	if err := json.NewDecoder(resp.Body).Decode(&issues); err != nil {
 		return service.Issue{}, errors.WithStack(err)
 	}
 
-	return yc.convertToIssue(issueResponse), nil
+	if len(issues) == 0 {
+		return service.Issue{}, service.ErrIssueNotFound
+	}
+
+	return yc.convertToIssue(issues[0]), nil
 }
 
 func (yc *YoutrackClient) convertToIssue(resp youtrackIssueResponse) service.Issue {
@@ -76,13 +75,6 @@ func (yc *YoutrackClient) convertToIssue(resp youtrackIssueResponse) service.Iss
 		Tags:        make([]string, 0, len(resp.Tags)),
 	}
 
-	switch resp.State.Name {
-	case "Code Review":
-		issue.State = service.IssueStateCodeReview
-	default:
-		issue.State = service.IssueStateOther
-	}
-
 	for _, tag := range resp.Tags {
 		issue.Tags = append(issue.Tags, tag.Name)
 	}
@@ -91,14 +83,10 @@ func (yc *YoutrackClient) convertToIssue(resp youtrackIssueResponse) service.Iss
 }
 
 type youtrackIssueResponse struct {
-	ID          string `json:"id"`
+	ID          string `json:"idReadable"`
 	Summary     string `json:"summary"`
 	Description string `json:"description"`
-	State       struct {
-		Type string `json:"$type"`
-		Name string `json:"name"`
-	} `json:"state"`
-	Tags []struct {
+	Tags        []struct {
 		Name string `json:"name"`
 	} `json:"tags"`
 }

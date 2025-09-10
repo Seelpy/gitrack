@@ -16,7 +16,7 @@ func main() {
 	cliApp := infraapp.New("test", "1.0.0")
 
 	gitService := git.NewService()
-	ytService := yt.NewService("", "")
+	ytService := yt.NewService("http://localhost:9090/", "perm-YWRtaW4=.NDMtMA==.TaQEjpQ5wLs19NJDhTlKjSfSbkQwws")
 	gitrack := service.NewGitrack(gitService, ytService, nil)
 	provider := app.NewProvider(gitrack)
 	command.RegisterCommands(cliApp, provider)

@@ -2,8 +2,8 @@ package command
 
 import (
 	"context"
+	"fmt"
 	"gitrack/pkg/app/service"
-	"log"
 )
 
 func newBranch(gitrack service.Gitrack) Command {
@@ -17,15 +17,15 @@ type branch struct {
 }
 
 func (c *branch) Name() string {
-	return "issue"
+	return "branch"
 }
 
 func (c *branch) Help() string {
-	return "Get issue information"
+	return "Get branch information"
 }
 
 func (c *branch) Description() string {
-	return "Get issue information"
+	return "Get branch information"
 }
 
 func (c *branch) Run(_ []string) error {
@@ -35,11 +35,10 @@ func (c *branch) Run(_ []string) error {
 		return err
 	}
 
-	log.Printf("Issue ID: %s", issue.ID)
-	log.Printf("Title: %s", issue.Title)
-	log.Printf("Description: %s", issue.Description)
-	log.Printf("State: %v", issue.State)
-	log.Printf("Tags: %v", issue.Tags)
+	fmt.Printf("Issue ID: 	%s\n", issue.ID)
+	fmt.Printf("Title: 		%s\n", issue.Title)
+	fmt.Printf("Description: 	%s\n", issue.Description)
+	fmt.Printf("Tags: 		%s\n", issue.Tags)
 
 	return nil
 }

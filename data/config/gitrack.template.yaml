@@ -1,0 +1,25 @@
+gitrack:
+  youtrack:
+    host: "<youtrack-host-url>"
+    token: "<youtrack-api-token>"
+  features:
+    - baseTag: "<base-feature-tag-1>"
+      repositories:
+        - repository: "<repository-name>"
+          releases:
+            - tag: "<pre-release-tag>"
+              branch: "<pre-release-branch>"
+            - tag: "<public-release-tag>"
+              branch: "<public-release-branch>"
+            - tag: "<post-release-tag>"
+              branch: "<post-release-branch>"
+    - baseTag: "<base-feature-tag-2>"
+      repositories:
+        - repository: "<repository-name>"
+          releases:
+            - tag: "<pre-release-tag-2>"
+              branch: "<pre-release-branch-2>"
+            - tag: "<public-release-tag-2>"
+              branch: "<public-release-branch-2>"
+            - tag: "<post-release-tag-2>"
+              branch: "<post-release-branch-2>"
