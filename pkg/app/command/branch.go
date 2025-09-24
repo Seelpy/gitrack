@@ -17,15 +17,15 @@ type branch struct {
 }
 
 func (c *branch) Name() string {
-	return "branch"
+	return "b"
 }
 
 func (c *branch) Help() string {
-	return "Get branch information"
+	return "b"
 }
 
 func (c *branch) Description() string {
-	return "Get branch information"
+	return "Get issue information from youtrack issue"
 }
 
 func (c *branch) Run(_ []string) error {

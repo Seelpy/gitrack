@@ -26,5 +26,6 @@ func init() {
 		func(provider app.Provider) Command { return newLogger(newSetConfigPath()) },
 		func(provider app.Provider) Command { return newLogger(newGetConfigPath()) },
 		func(provider app.Provider) Command { return newLogger(newMerge(provider.Gitrack)) },
+		func(provider app.Provider) Command { return newLogger(newCreateBranch(provider.Gitrack)) },
 	)
 }

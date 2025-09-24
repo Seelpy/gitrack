@@ -15,4 +15,5 @@ type Git interface {
 	GetRepository() (string, error)
 	Commit(message string) error
 	Merge(from string, to string) error
+	CreateBranch(from string, name string) error
 }

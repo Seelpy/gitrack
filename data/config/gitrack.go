@@ -23,7 +23,11 @@ type EmptyConfig struct {
 }
 
 func (ec *EmptyConfig) GetFeatureConfig(_ string, _ string) (appservice.FeatureConfig, error) {
-	return appservice.FeatureConfig{}, ErrPathNotExist
+	return appservice.FeatureConfig{}, errors.WithStack(ErrPathNotExist)
+}
+
+func (ec *EmptyConfig) GetFeatureBranch(_ string, _ string) (string, error) {
+	return "", errors.WithStack(ErrPathNotExist)
 }
 
 type Config struct {
@@ -90,7 +94,23 @@ func (c *Config) GetFeatureConfig(tag string, repository string) (appservice.Fea
 		}
 	}
 
-	return appservice.FeatureConfig{}, appservice.ErrFeatureConfigNotFound
+	return appservice.FeatureConfig{}, errors.WithStack(appservice.ErrFeatureConfigNotFound)
+}
+
+func (c *Config) GetFeatureBranch(tag string, repository string) (string, error) {
+	for _, feature := range c.Gitrack.Features {
+		for _, repo := range feature.Repositories {
+			if repo.RepositoryName == repository {
+				for _, release := range repo.Releases {
+					if release.Tag == tag {
+						return release.Branch, nil
+					}
+				}
+			}
+		}
+	}
+
+	return "", errors.WithStack(appservice.ErrFeatureBranchNotFound)
 }
 
 func convertReleases(releases []Release) []appservice.ReleaseConfig {

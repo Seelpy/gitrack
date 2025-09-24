@@ -13,10 +13,12 @@ const (
 
 var (
 	ErrFeatureConfigNotFound = stderrors.New("feature config not found")
+	ErrFeatureBranchNotFound = stderrors.New("feature branch found")
 )
 
 type GitrackConfigProvider interface {
 	GetFeatureConfig(repository string, tag string) (FeatureConfig, error)
+	GetFeatureBranch(tag string, repository string) (string, error)
 }
 
 type Features []FeatureConfig
@@ -91,6 +93,32 @@ func (g *Gitrack) Merge(ctx context.Context) error {
 		}
 	}
 	return nil
+}
+
+func (g *Gitrack) CreateBranch(ctx context.Context, issueID string) error {
+	repository, err := g.git.GetRepository()
+	if err != nil {
+		return err
+	}
+
+	issue, err := g.youtrack.GetIssue(ctx, issueID)
+	if err != nil {
+		return err
+	}
+
+	featureBranch := ""
+	for _, tag := range issue.Tags {
+		featureBranch, err = g.config.GetFeatureBranch(repository, tag)
+		if errors.Is(err, ErrFeatureBranchNotFound) {
+			continue
+		}
+		if err != nil {
+			return err
+		}
+		break
+	}
+
+	return g.git.CreateBranch(featureBranch, issueID)
 }
 
 func (g *Gitrack) getMergePipeline(issue Issue) ([]string, error) {

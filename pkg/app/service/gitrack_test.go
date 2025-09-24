@@ -192,6 +192,41 @@ func TestMerge(t *testing.T) {
 	}, git.merges)
 }
 
+func TestCreateBranch(t *testing.T) {
+	ctx := context.Background()
+
+	git := newMockGit()
+	youtrack := newMockYoutrack()
+	configProvider := newMockGitrackConfigProvider()
+
+	generateDefaultYoutrack(youtrack, git)
+	generateDefaultConfigs(configProvider)
+
+	git.checkout(unexpectedIssueID)
+
+	gitrack := NewGitrack(git, youtrack, configProvider)
+
+	err := gitrack.CreateBranch(ctx, issueID1)
+	assert.Nil(t, err)
+	assert.Equal(t, []createdBranchData{
+		{
+			from:   featureBranchPre1,
+			branch: issueID1,
+		},
+	}, git.created)
+
+	git.clear()
+
+	err = gitrack.CreateBranch(ctx, issueID2)
+	assert.Nil(t, err)
+	assert.Equal(t, []createdBranchData{
+		{
+			from:   featureBranchPublic1,
+			branch: issueID2,
+		},
+	}, git.created)
+}
+
 func generateDefaultYoutrack(youtrack *mockYoutrack, git *mockGit) {
 	youtrack.addIssue(issue1)
 	youtrack.addIssue(issue2)
@@ -227,11 +262,17 @@ type mockGit struct {
 	repository string
 	lastCommit string
 	merges     []mergeData
+	created    []createdBranchData
 }
 
 type mergeData struct {
 	from string
 	to   string
+}
+
+type createdBranchData struct {
+	from   string
+	branch string
 }
 
 func (g *mockGit) GetBranch() (string, error) {
@@ -261,8 +302,17 @@ func (g *mockGit) Merge(from string, to string) error {
 	return nil
 }
 
+func (g *mockGit) CreateBranch(from string, branch string) error {
+	g.created = append(g.created, createdBranchData{
+		from:   from,
+		branch: branch,
+	})
+	return nil
+}
+
 func (g *mockGit) clear() {
 	g.merges = make([]mergeData, 0)
+	g.created = make([]createdBranchData, 0)
 }
 
 func (g *mockGit) checkout(branch string) {
@@ -299,6 +349,19 @@ func (m *mockGitrackConfigProvider) GetFeatureConfig(_ string, tag string) (Feat
 		return FeatureConfig{}, ErrFeatureConfigNotFound
 	}
 	return config, nil
+}
+
+func (m *mockGitrackConfigProvider) GetFeatureBranch(_ string, tag string) (string, error) {
+	config, exists := m.configs[tag]
+	if !exists {
+		return "", ErrFeatureBranchNotFound
+	}
+	for _, releaseConfig := range config.Releases {
+		if releaseConfig.YoutrackTag == tag {
+			return releaseConfig.ReleaseBranch, nil
+		}
+	}
+	return "", ErrFeatureBranchNotFound
 }
 
 func (m *mockGitrackConfigProvider) addFeatureConfig(config FeatureConfig) {

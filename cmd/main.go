@@ -2,12 +2,13 @@ package main
 
 import (
 	"errors"
+	"log"
+	"os"
+
 	config2 "gitrack/data/config"
 	"gitrack/pkg/app/service"
 	"gitrack/pkg/inferastructure/git"
 	"gitrack/pkg/inferastructure/yt"
-	"log"
-	"os"
 
 	"gitrack/pkg/app"
 	"gitrack/pkg/app/command"

@@ -4,6 +4,7 @@ import (
 	stderrors "errors"
 	"fmt"
 	"github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/config"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/pkg/errors"
 	appservice "gitrack/pkg/app/service"
@@ -163,6 +164,40 @@ func (g *service) Merge(from string, to string) error {
 			Branch: currentHead.Name(),
 			Force:  true,
 		})
+		return errors.WithStack(err)
+	}
+
+	return nil
+}
+
+func (g *service) CreateBranch(from string, name string) error {
+	repo, err := g.getCurrentRepository()
+	if err != nil {
+		return err
+	}
+
+	worktree, err := repo.Worktree()
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
+	fromRef, err := repo.Reference(plumbing.ReferenceName(fmt.Sprintf("refs/heads/%s", from)), true)
+	if err != nil {
+		return errors.WithStack(appservice.ErrBranchNotFound)
+	}
+
+	err = worktree.Checkout(&git.CheckoutOptions{
+		Branch: fromRef.Name(),
+		Force:  false,
+	})
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
+	err = repo.CreateBranch(&config.Branch{
+		Name: name,
+	})
+	if err != nil {
 		return errors.WithStack(err)
 	}
 
